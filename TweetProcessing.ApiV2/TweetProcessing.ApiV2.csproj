@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
+    <PackageReference Include="System.IO.Pipelines" Version="6.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TweetProcessing.Abstractions\TweetProcessing.Abstractions.csproj" />
   </ItemGroup>
 
