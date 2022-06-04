@@ -7,65 +7,32 @@ namespace TweetProcessing.ApiV2
 {
     internal class SampleStreamProcessor
     {
-        private readonly Pipe pipe = new Pipe();
         private readonly ILogger logger;
+        private readonly LinesChannel linesChannel;
 
-        SampleStreamProcessor(ILogger<SampleStreamProcessor> logger)
+        SampleStreamProcessor(ILogger<SampleStreamProcessor> logger, LinesChannel linesChannel)
         {
             this.logger = logger;
+            this.linesChannel = linesChannel;
         }
 
         public async Task ProcessStreamAsync(Stream stream, CancellationToken cancellationToken)
         {
-            const int minimumBufferSize = 512;
+            var pipeReader = PipeReader.Create(stream);
 
             while (true)
             {
-                // Allocate at least 512 bytes from the PipeWriter.
-                Memory<byte> memory = pipe.Writer.GetMemory(minimumBufferSize);
-                try
-                {
-                    int bytesRead = await stream.ReadAsync(memory, cancellationToken);
-                    if (bytesRead == 0)
-                    {
-                        break;
-                    }
-                    // Tell the PipeWriter how much was read from the Stream.
-                    pipe.Writer.Advance(bytesRead);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Exception processing Twitter Sample Stream");
-                    break;
-                }
-
-                // Make the data available to the PipeReader.
-                FlushResult result = await pipe.Writer.FlushAsync();
-
-                if (result.IsCompleted)
-                {
-                    break;
-                }
-            }
-
-            // By completing PipeWriter, tell the PipeReader that there's no more data coming.
-            await pipe.Writer.CompleteAsync();
-        }
-
-        public async Task ReadPipeAsync()
-        {
-            while (true)
-            {
-                ReadResult result = await pipe.Reader.ReadAsync();
+                ReadResult result = await pipeReader.ReadAsync();
                 ReadOnlySequence<byte> buffer = result.Buffer;
 
-                while (TryReadTweet(ref buffer, out ReadOnlySequence<byte> tweetBytes))
+                while (TryReadLine(ref buffer, out ReadOnlySequence<byte> lineBytes))
                 {
-                    ProcessTweet(tweetBytes);
+                    // writes to our thread-safe queue
+                    await linesChannel.Writer.WriteAsync(lineBytes, cancellationToken);
                 }
 
                 // Tell the PipeReader how much of the buffer has been consumed.
-                pipe.Reader.AdvanceTo(buffer.Start, buffer.End);
+                pipeReader.AdvanceTo(buffer.Start, buffer.End);
 
                 // Stop reading if there's no more data coming.
                 if (result.IsCompleted)
@@ -73,35 +40,22 @@ namespace TweetProcessing.ApiV2
                     break;
                 }
             }
-
             // Mark the PipeReader as complete.
-            await pipe.Reader.CompleteAsync();
+            await pipeReader.CompleteAsync();
         }
 
-        private void ProcessTweet(ReadOnlySequence<byte> tweetBytes)
+        bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> lineBytes)
         {
-            throw new NotImplementedException();
-        }
-
-        private readonly byte[] delimiter = Encoding.UTF8.GetBytes("\"data\":");
-
-        bool TryReadTweet(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> tweetBytes)
-        {
-            var sequenceReader = new SequenceReader<byte>(buffer);
-            sequenceReader.TryReadTo(out tweetBytes, delimiter, true);
-            
-            // Look for 'data' in the buffer.
-            buffer.GetPosition()
+            // Look for 'new line' in the buffer.
             SequencePosition? position = buffer.PositionOf((byte)'\n');
-          
-            if (position == null)
+            if (position is null)
             {
-                tweetBytes = default;
+                lineBytes = default;
                 return false;
             }
 
             // Skip the line + the \n.
-            tweetBytes = buffer.Slice(0, position.Value);
+            lineBytes = buffer.Slice(0, position.Value);
             buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
             return true;
         }

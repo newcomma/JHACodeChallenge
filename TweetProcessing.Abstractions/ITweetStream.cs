@@ -8,6 +8,6 @@ namespace TweetProcessing.Abstractions
 {
     public interface ITweetStream
     {
-        IAsyncEnumerable<TweetDto> StreamTweetsAsync();
+        IAsyncEnumerable<TweetDto> ReadTweetsAsync(CancellationToken cancellationToken);
     }
 }

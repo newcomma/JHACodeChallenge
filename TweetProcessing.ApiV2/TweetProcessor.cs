@@ -11,7 +11,7 @@ namespace TweetProcessing.ApiV2
         {
             while(!cancellationToken.IsCancellationRequested)
             {
-                await ConnectAsync(cancellationToken);
+                //await ConnectAsync(cancellationToken);
                 await ProcessTweetsAsync(cancellationToken);
             }
         }
