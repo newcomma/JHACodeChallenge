@@ -5,10 +5,10 @@ namespace TweetProcessing.ApiV2
 {
     internal class LinesChannel
     {
-        private Channel<ReadOnlySequence<byte>> channel = Channel.CreateUnbounded<ReadOnlySequence<byte>>();
+        private Channel<byte[]> channel = Channel.CreateUnbounded<byte[]>();
 
-        public ChannelWriter<ReadOnlySequence<byte>> Writer { get => channel.Writer; }
+        public ChannelWriter<byte[]> Writer { get => channel.Writer; }
 
-        public ChannelReader<ReadOnlySequence<byte>> Reader { get => channel.Reader; }
+        public ChannelReader<byte[]> Reader { get => channel.Reader; }
     }
 }

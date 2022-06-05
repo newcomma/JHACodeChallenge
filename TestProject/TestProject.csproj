@@ -21,4 +21,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TweetProcessing.ApiV2\TweetProcessing.ApiV2.csproj" />
+  </ItemGroup>
+
 </Project>

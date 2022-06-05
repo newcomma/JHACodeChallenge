@@ -1,22 +1,23 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.IO.Pipelines;
+using System.Runtime.CompilerServices;
 using System.Text;
+
+[assembly: InternalsVisibleTo("TestProject")]
 
 namespace TweetProcessing.ApiV2
 {
-    internal class SampleStreamProcessor
+    internal class StreamToChannelProcessor
     {
         private readonly ILogger logger;
-        private readonly LinesChannel linesChannel;
 
-        SampleStreamProcessor(ILogger<SampleStreamProcessor> logger, LinesChannel linesChannel)
+        public StreamToChannelProcessor(ILogger<StreamToChannelProcessor> logger)
         {
             this.logger = logger;
-            this.linesChannel = linesChannel;
         }
 
-        public async Task ProcessStreamAsync(Stream stream, CancellationToken cancellationToken)
+        public async Task ProcessAsync(Stream stream, LinesChannel linesChannel, CancellationToken cancellationToken = default)
         {
             var pipeReader = PipeReader.Create(stream);
 
@@ -28,7 +29,7 @@ namespace TweetProcessing.ApiV2
                 while (TryReadLine(ref buffer, out ReadOnlySequence<byte> lineBytes))
                 {
                     // writes to our thread-safe queue
-                    await linesChannel.Writer.WriteAsync(lineBytes, cancellationToken);
+                    await linesChannel.Writer.WriteAsync(lineBytes.ToArray(), cancellationToken);
                 }
 
                 // Tell the PipeReader how much of the buffer has been consumed.

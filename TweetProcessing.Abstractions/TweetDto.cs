@@ -1,4 +1,13 @@
 ﻿namespace TweetProcessing.Abstractions
 {
-    public record TweetDto;
+    public class TweetDto
+    {
+        public DataDto? Data { get; set; }
+        
+    }
+
+    public class DataDto
+    {
+        public string id { get; set; } = string.Empty;
+    }
 }

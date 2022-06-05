@@ -11,7 +11,7 @@ namespace TweetProcessing.ApiV2
     {
         public Task<ITweetStream> Create()
         {
-            
+            throw new NotImplementedException();
         }
     }
 }

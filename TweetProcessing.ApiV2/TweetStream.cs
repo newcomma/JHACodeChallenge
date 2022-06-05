@@ -18,12 +18,12 @@ namespace TweetProcessing.ApiV2
 
         public async IAsyncEnumerable<TweetDto> ReadTweetsAsync(CancellationToken cancellationToken)
         {
-            await foreach(ReadOnlySequence<byte> line in channel.Reader.ReadAllAsync(cancellationToken))
+            await foreach(byte[] line in channel.Reader.ReadAllAsync(cancellationToken))
             {
                 TweetDto? tweet = null;
                 try
                 {
-                    tweet = JsonSerializer.Deserialize<TweetDto>(line.ToArray());
+                    tweet = JsonSerializer.Deserialize<TweetDto>(line);
                 }
                 catch (JsonException jsonException)
                 {
