@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Buffers;
-using System.Text.Json;
 using TweetProcessing.Abstractions;
 
 namespace TweetProcessing.ApiV2
@@ -8,28 +6,19 @@ namespace TweetProcessing.ApiV2
     internal class TweetStream : ITweetStream
     {
         private readonly LinesChannel channel;
-        private readonly ILogger<TweetStream> logger;
+        private readonly TweetParser tweetParser;
 
-        public TweetStream(LinesChannel channel, ILogger<TweetStream> logger)
+        public TweetStream(LinesChannel channel, TweetParser tweetParser, ILogger<TweetStream> logger)
         {
             this.channel = channel;
-            this.logger = logger;
+            this.tweetParser = tweetParser;
         }
 
-        public async IAsyncEnumerable<TweetDto> ReadTweetsAsync(CancellationToken cancellationToken)
+        public async IAsyncEnumerable<TweetDto> ReadAsync(CancellationToken cancellationToken)
         {
             await foreach(byte[] line in channel.Reader.ReadAllAsync(cancellationToken))
             {
-                TweetDto? tweet = null;
-                try
-                {
-                    tweet = JsonSerializer.Deserialize<TweetDto>(line);
-                }
-                catch (JsonException jsonException)
-                {
-                    logger.LogWarning(jsonException, "Encountered Json that is not a Tweet");
-                }
-                if (tweet is not null)
+                if(tweetParser.TryParse(line, out TweetDto? tweet))
                 {
                     yield return tweet;
                 }

@@ -2,12 +2,12 @@
 {
     public class TweetDto
     {
-        public DataDto? Data { get; set; }
-        
+        public string id { get; set; } = string.Empty;
+        public string text { get; set; } = string.Empty;
     }
 
     public class DataDto
     {
-        public string id { get; set; } = string.Empty;
+        public TweetDto data { get; set; } = new TweetDto();        
     }
 }

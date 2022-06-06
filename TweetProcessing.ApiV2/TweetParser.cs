@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using TweetProcessing.Abstractions;
 
 namespace TweetProcessing.ApiV2
@@ -18,17 +15,35 @@ namespace TweetProcessing.ApiV2
             this.logger = logger;
         }
 
-        internal bool TryParse(string json, out TweetDto? tweetDto)
+        internal bool TryParse(Span<byte> bytes, [NotNullWhen(returnValue: true)] out TweetDto? tweetDto)
         {
             try
             {
-
-                tweetDto = JsonSerializer.Deserialize<TweetDto>(json);
-                return true;
+                string jsonString = Encoding.UTF8.GetString(bytes);
+                return TryParse(jsonString, out tweetDto);
             }
-            catch (JsonException jsonException)
+            catch (Exception exception)
             {
-                logger.LogWarning(jsonException, "Encountered Json that is not a Tweet");
+                logger.LogWarning(exception, "Encountered JSON that is not a Tweet");
+            }
+            tweetDto = default;
+            return false;
+        }
+
+
+        internal bool TryParse(string json, [NotNullWhen(returnValue: true)] out TweetDto? tweetDto)
+        {
+            try
+            {
+                tweetDto = JsonSerializer.Deserialize<DataDto>(json)?.data;
+                if(tweetDto is not null)
+                {
+                    return true;
+                }
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(exception, "Encountered JSON that is not a Tweet");
             }
             tweetDto = default;
             return false;
