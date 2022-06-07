@@ -17,7 +17,7 @@ namespace TestProject
         /// <summary>
         /// Sampling of raw bytes from the Twitter 'Sample Stream' API
         /// </summary>
-        public static Stream Stream = new MemoryStream(Bytes);
+        public static Stream Stream { get => new MemoryStream(Bytes); }
     }
 }
 
