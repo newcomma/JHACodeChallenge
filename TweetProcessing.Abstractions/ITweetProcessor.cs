@@ -2,6 +2,6 @@
 {
     public interface ITweetProcessor
     {
-        public Task StartAsync(CancellationToken cancellationToken);
+        Task ProcessAsync(TweetDto tweet);
     }
 }

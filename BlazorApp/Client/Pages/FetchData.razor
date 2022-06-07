@@ -1,0 +1,60 @@
+﻿@page "/fetchdata"
+@using Statistics
+@inject HttpClient Http
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Tweet Statistics</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+<h3>Total Tweet's Processed : @count</h3>
+
+
+@if (topHashtags == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Hashtag</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var hashtagCount in topHashtags)
+            {
+                <tr>
+                    <td>#@hashtagCount.Hashtag</td>
+                    <td>@hashtagCount.Count</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<HashtagCountDto>? topHashtags;
+    private int count;
+
+    protected override Task OnInitializedAsync()
+    {
+        _ = PeriodicUpdateAsync();
+        return Task.CompletedTask;
+        //hashtags = await Http.GetFromJsonAsync<TopHashTag[]>("TopHashtags");
+    }
+
+    private async Task PeriodicUpdateAsync()
+    {
+        while(true)
+        {
+            count = await Http.GetFromJsonAsync<int>("TweetTotal");
+            topHashtags = await Http.GetFromJsonAsync<IEnumerable<HashtagCountDto>>("TopHashtags");
+            StateHasChanged();
+            await Task.Delay(3000);
+        }
+    }
+}

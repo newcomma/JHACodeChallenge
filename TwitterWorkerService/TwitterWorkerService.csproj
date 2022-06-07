@@ -14,5 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\TweetProcessing.Abstractions\TweetProcessing.Abstractions.csproj" />
     <ProjectReference Include="..\TweetProcessing.ApiV2\TweetProcessing.ApiV2.csproj" />
+    <ProjectReference Include="..\TweetStatistics\Statistics.csproj" />
   </ItemGroup>
 </Project>

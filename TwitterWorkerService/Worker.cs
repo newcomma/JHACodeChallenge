@@ -4,27 +4,24 @@ namespace TwitterWorkerService
 {
     public class Worker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly ITweetProcessor _tweetProcessor;
-        private readonly ITweetStream _tweetStream;
+        private readonly ILogger<Worker> logger;
+        private readonly ITweetListener tweetListener;
+        private readonly ITweetStreamReader tweetStreamReader;
 
-        public Worker(ILogger<Worker> logger, ITweetProcessor tweetProcessor, ITweetStream tweetStream)
+        public Worker(ILogger<Worker> logger, ITweetListener tweetListener, ITweetStreamReader tweetStreamReader)
         {
-            _logger = logger;
-            _tweetProcessor = tweetProcessor;
-            _tweetStream = tweetStream;
+            this.logger = logger;
+            this.tweetListener = tweetListener;
+            this.tweetStreamReader = tweetStreamReader;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation($"Starting Worker Service");
+            logger.LogInformation($"Starting Worker Service");
 
-            _ = _tweetProcessor.StartAsync(stoppingToken);
+            _ = tweetListener.StartAsync(stoppingToken);
 
-            await foreach(var tweet in _tweetStream.ReadAsync(stoppingToken))
-            {
-                _logger.LogInformation($"processing tweet {tweet.text}");
-            }
+            await tweetStreamReader.StartAsync(stoppingToken);
         }
     }
 }

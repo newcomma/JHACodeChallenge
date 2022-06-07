@@ -1,3 +1,4 @@
+using Statistics;
 using TweetProcessing.ApiV2;
 using TwitterWorkerService;
 
@@ -6,6 +7,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         services.AddHostedService<Worker>();
         services.AddTweetStreaming();
+        services.AddTweetStatistics();
     })
     .Build();
 

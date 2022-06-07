@@ -8,14 +8,14 @@ namespace TestProject
     public class StreamToChannelProcessorTests
     {
         [Theory]
-        [InlineData("1\n", 1)]
-        [InlineData("1\n2\n", 2)]
-        [InlineData("1\n2\n3\n", 3)]
-        [InlineData("1\n2\n3\n4\n", 4)]
-        public async Task ProcessAsync_StreamHasLines_ChannelContainsCorrectNumberOfLines(string text, int e)
+        [InlineData("1\n")]
+        [InlineData("1\n2\n")]
+        [InlineData("1\n2\n3\n")]
+        [InlineData("1\n2\n3\n4\n")]
+        public async Task ProcessAsync_StreamHasLines_ChannelContainsCorrectNumberOfLines(string text)
         {
             // Arrange
-            // Convert to stream of UTF8 bytes
+            // Convert to stream of UTF8 encoded bytes
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
 
             LinesChannel linesChannel = new();

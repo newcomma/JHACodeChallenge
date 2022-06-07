@@ -10,7 +10,10 @@ namespace TweetProcessing.ApiV2
         /// </summary>
         public static IServiceCollection AddTweetStreaming(this IServiceCollection services)
         {
-            services.AddSingleton<ITweetProcessor, TweetProcessor>();
+            services.AddSingleton<ITweetListener, TweetListener>();
+            services.AddTransient<ITweetStreamReader, TweetStreamReader>();
+            services.AddTransient<ITweetProcessorPipeline, TweetProcessorPipeline>();
+
             services.AddSingleton<TweetParser>();
             services.AddSingleton<LinesChannel>();
             services.AddSingleton<StreamToChannelProcessor>();
