@@ -1,4 +1,5 @@
 using Statistics;
+using TweetProcessing.Abstractions;
 using TweetProcessing.ApiV2;
 using TwitterWorkerService;
 
@@ -11,6 +12,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddTweetStatistics();
 builder.Services.AddTweetStreaming();
 builder.Services.AddHostedService<Worker>();
+
+builder.Services.Configure<ConcurrencyOptions>(
+    builder.Configuration.GetSection(ConcurrencyOptions.Concurrency));
+builder.Services.Configure<TwitterOptions>(
+    builder.Configuration.GetSection(TwitterOptions.Twitter));
 
 var app = builder.Build();
 

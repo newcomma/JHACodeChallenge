@@ -10,11 +10,11 @@ namespace Statistics.TweetProcessors
     {
         private int count = 0;
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-        private readonly TweetTotalService tweetTotal;
+        private readonly ITweetTotalService tweetTotalService;
 
-        public CountTweetProcessor(TweetTotalService tweetTotal)
+        public CountTweetProcessor(ITweetTotalService tweetTotalService)
         {
-            this.tweetTotal = tweetTotal;
+            this.tweetTotalService = tweetTotalService;
         }
 
         public async Task ProcessAsync(TweetDto tweet)
@@ -28,7 +28,7 @@ namespace Statistics.TweetProcessors
                 // to relieve contention on the shared-resource.
                 if (count >= 10)
                 {
-                    await tweetTotal.AddAsync(count);
+                    await tweetTotalService.AddAsync(count);
                     count = 0;
                 }
             }

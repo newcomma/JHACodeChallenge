@@ -24,7 +24,7 @@ namespace TweetProcessing.ApiV2
             }
             catch (Exception exception)
             {
-                logger.LogWarning(exception, "Encountered JSON that is not a Tweet");
+                logger.LogWarning(exception, $"Encountered bytes that could not be parsed as a JSON Tweet");
             }
             tweetDto = default;
             return false;
@@ -35,15 +35,18 @@ namespace TweetProcessing.ApiV2
         {
             try
             {
-                tweetDto = JsonSerializer.Deserialize<DataDto>(json)?.data;
-                if(tweetDto is not null)
+                if (!string.IsNullOrWhiteSpace(json))
                 {
-                    return true;
+                    tweetDto = JsonSerializer.Deserialize<DataDto>(json)?.data;
+                    if (tweetDto is not null)
+                    {
+                        return true;
+                    }
                 }
             }
             catch (Exception exception)
             {
-                logger.LogWarning(exception, "Encountered JSON that is not a Tweet");
+                logger.LogWarning(exception, $"Encountered UTF8 text that is not a JSON Tweet: text={json}");
             }
             tweetDto = default;
             return false;

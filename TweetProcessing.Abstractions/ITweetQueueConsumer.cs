@@ -1,6 +1,6 @@
 ﻿namespace TweetProcessing.Abstractions
 {
-    public interface ITweetStreamReader
+    public interface ITweetQueueConsumer
     {
         Task StartAsync(CancellationToken stoppingToken);
     }

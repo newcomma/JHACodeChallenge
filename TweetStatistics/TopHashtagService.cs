@@ -46,7 +46,6 @@ namespace Statistics
                 updateValueFactory: (key, prev) => prev + hashtagCount.Count);                
         }
 
-
         private void UpdateTopTenList(string hashtag, int newTotal)
         {
             // If the given hashtag is already in the Top-10 update it.

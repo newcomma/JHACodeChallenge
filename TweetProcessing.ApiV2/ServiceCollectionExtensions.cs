@@ -11,17 +11,13 @@ namespace TweetProcessing.ApiV2
         public static IServiceCollection AddTweetStreaming(this IServiceCollection services)
         {
             services.AddSingleton<ITweetListener, TweetListener>();
-            services.AddTransient<ITweetStreamReader, TweetStreamReader>();
+            services.AddSingleton<ITweetQueue, TweetQueue>();
+            services.AddSingleton<ITweetQueueConsumerFactory, TweetQueueConsumerFactory>();
+
             services.AddTransient<ITweetProcessorPipeline, TweetProcessorPipeline>();
 
             services.AddSingleton<TweetParser>();
-            services.AddSingleton<LinesChannel>();
-            services.AddSingleton<StreamToChannelProcessor>();
-
-            // Using 'Transient' to allow scaling horizontally.
-            // Each instance of the ITweetStream allows access to the shared tweet queue
-            // allowing concurrent processing of tweets.
-            services.AddTransient<ITweetStream, TweetStream>();
+            services.AddSingleton<StreamToQueueProcessor>();
 
             return services;
         }

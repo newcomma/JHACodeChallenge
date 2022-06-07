@@ -15,7 +15,7 @@ namespace Statistics
             services.AddTransient<ITweetProcessor, CountTweetProcessor>();
             services.AddTransient<ITweetProcessor, HashtagTweetProcessor>();
 
-            services.AddSingleton<TweetTotalService>();
+            services.AddSingleton<ITweetTotalService, TweetTotalService>();
             services.AddSingleton<ITopHashtagService, TopHashtagService>();
 
             return services;

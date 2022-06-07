@@ -17,7 +17,7 @@ namespace Statistics.TweetProcessors
 
         public Task ProcessAsync(TweetDto tweet)
         {
-            logger.LogInformation($"processing tweet {tweet.text}");
+            logger.LogTrace($"processing tweet {tweet.text}");
             return Task.CompletedTask;
         }
     }

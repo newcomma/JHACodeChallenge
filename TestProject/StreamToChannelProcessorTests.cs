@@ -18,8 +18,8 @@ namespace TestProject
             // Convert to stream of UTF8 encoded bytes
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
 
-            LinesChannel linesChannel = new();
-            StreamToChannelProcessor streamToChannelProcessor = new (NullLogger);
+            TweetQueue linesChannel = new();
+            StreamToQueueProcessor streamToChannelProcessor = new (NullLogger);
 
             // Act
             await streamToChannelProcessor.ProcessAsync(stream, linesChannel);
@@ -34,8 +34,8 @@ namespace TestProject
         public async Task ProcessAsync_GivenSampleStream_ChannelContainsCorrectNumberOfLines()
         {
             // Arrange
-            LinesChannel linesChannel = new();
-            StreamToChannelProcessor streamProcessor = new (NullLogger);
+            TweetQueue linesChannel = new();
+            StreamToQueueProcessor streamProcessor = new (NullLogger);
 
             // Act
             await streamProcessor.ProcessAsync(SampleData.Stream, linesChannel);
@@ -51,8 +51,8 @@ namespace TestProject
         public async Task ProcessAsync_GivenSampleStream_ChannelContainsCorrectBytes()
         {
             // Arrange
-            LinesChannel linesChannel = new();
-            StreamToChannelProcessor streamProcessor = new(NullLogger);
+            TweetQueue linesChannel = new();
+            StreamToQueueProcessor streamProcessor = new(NullLogger);
 
             // Act
             await streamProcessor.ProcessAsync(SampleData.Stream, linesChannel);
@@ -72,7 +72,7 @@ namespace TestProject
         /// <summary>
         /// DRY method for creating the <see cref="ILogger"/> for the tests 
         /// </summary>
-        private static ILogger<StreamToChannelProcessor> NullLogger
-            => new NullLogger<StreamToChannelProcessor>();
+        private static ILogger<StreamToQueueProcessor> NullLogger
+            => new NullLogger<StreamToQueueProcessor>();
     }
 }

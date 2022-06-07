@@ -2,22 +2,33 @@
 using System.Buffers;
 using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
-using System.Text;
+using TweetProcessing.Abstractions;
 
 [assembly: InternalsVisibleTo("TestProject")]
 
 namespace TweetProcessing.ApiV2
 {
-    internal class StreamToChannelProcessor
+    /// <summary>
+    /// Responsible for placing a stream of bytes onto our queue.
+    /// </summary>
+    internal class StreamToQueueProcessor
     {
         private readonly ILogger logger;
 
-        public StreamToChannelProcessor(ILogger<StreamToChannelProcessor> logger)
+        public StreamToQueueProcessor(ILogger<StreamToQueueProcessor> logger)
         {
             this.logger = logger;
         }
 
-        public async Task ProcessAsync(Stream stream, LinesChannel linesChannel, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Reads the given <see cref="Stream"/> of bytes and places them onto 
+        /// the given <see cref="ITweetQueue"/>.
+        /// </summary>
+        /// <remarks>
+        /// As the bytes are read from the given <see cref="Stream"/> a new tweet is detected
+        /// by the pressence of the UTF8 '/n' character. 
+        /// </remarks>
+        public async Task ProcessAsync(Stream stream, ITweetQueue tweetQueue, CancellationToken cancellationToken = default)
         {
             var pipeReader = PipeReader.Create(stream);
 
@@ -29,7 +40,7 @@ namespace TweetProcessing.ApiV2
                 while (TryReadLine(ref buffer, out ReadOnlySequence<byte> lineBytes))
                 {
                     // writes to our thread-safe queue
-                    await linesChannel.Writer.WriteAsync(lineBytes.ToArray(), cancellationToken);
+                    await tweetQueue.Writer.WriteAsync(lineBytes.ToArray(), cancellationToken);
                 }
 
                 // Tell the PipeReader how much of the buffer has been consumed.

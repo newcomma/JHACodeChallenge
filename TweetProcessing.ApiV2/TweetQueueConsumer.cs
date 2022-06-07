@@ -2,20 +2,20 @@
 
 namespace TweetProcessing.ApiV2
 {
-    internal class TweetStreamReader : ITweetStreamReader
+    internal class TweetQueueConsumer : ITweetQueueConsumer
     {
         private readonly ITweetStream tweetStream;
         private readonly ITweetProcessorPipeline pipeline;
 
-        public TweetStreamReader(ITweetStream tweetStream, ITweetProcessorPipeline pipeline)
+        public TweetQueueConsumer(ITweetStream tweetStream, ITweetProcessorPipeline pipeline)
         {
             this.tweetStream = tweetStream;
             this.pipeline = pipeline;
         }
 
         /// <summary>
-        /// Starts reading from the <see cref="ITweetStream"/> and processing 
-        /// incoming <see cref="TweetDto"/>
+        /// Starts reading from the <see cref="ITweetQueue"/> and processing 
+        /// incoming <see cref="TweetDto"/> through the "pipline"
         /// </summary>
         public async Task StartAsync(CancellationToken stoppingToken)
         {

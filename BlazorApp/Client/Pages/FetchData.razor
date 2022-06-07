@@ -8,9 +8,10 @@
 
 <p>This component demonstrates fetching data from the server.</p>
 
-<h3>Total Tweet's Processed : @count</h3>
+<h3>Total Tweet's Processed : @count.ToString("N0")</h3>
 
 
+<h2>Top Hashtags</h2>
 @if (topHashtags == null)
 {
     <p><em>Loading...</em></p>
@@ -25,35 +26,47 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var hashtagCount in topHashtags)
+            @foreach (var hashtagCount in topHashtags.OrderByDescending(x=>x.Count))
             {
                 <tr>
                     <td>#@hashtagCount.Hashtag</td>
-                    <td>@hashtagCount.Count</td>
+                    <td>@hashtagCount.Count.ToString("N0")</td>
                 </tr>
             }
         </tbody>
     </table>
+
+    <div>@error</div>
 }
 
 @code {
     private IEnumerable<HashtagCountDto>? topHashtags;
     private int count;
+    private string error = string.Empty;
 
     protected override Task OnInitializedAsync()
     {
         _ = PeriodicUpdateAsync();
         return Task.CompletedTask;
-        //hashtags = await Http.GetFromJsonAsync<TopHashTag[]>("TopHashtags");
     }
 
+    /// <summary>
+    /// Periodically refreshes the values displayed on the page 
+    /// </summary>
     private async Task PeriodicUpdateAsync()
     {
         while(true)
         {
-            count = await Http.GetFromJsonAsync<int>("TweetTotal");
-            topHashtags = await Http.GetFromJsonAsync<IEnumerable<HashtagCountDto>>("TopHashtags");
-            StateHasChanged();
+            try
+            {
+                count = await Http.GetFromJsonAsync<int>("TweetTotal");
+                topHashtags = await Http.GetFromJsonAsync<IEnumerable<HashtagCountDto>>("TopHashtags");
+                StateHasChanged();
+            }
+            catch (Exception e)
+            {
+                error = e.Message;
+            }
             await Task.Delay(3000);
         }
     }

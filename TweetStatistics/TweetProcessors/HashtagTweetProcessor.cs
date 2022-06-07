@@ -3,6 +3,9 @@ using TweetProcessing.Abstractions;
 
 namespace Statistics.TweetProcessors
 {
+    /// <summary>
+    /// Records the hashtags of all tweets and keeps a count.
+    /// </summary>
     internal class HashtagTweetProcessor : ITweetProcessor
     {
         private readonly ConcurrentDictionary<string, int> hashtagToCountMap = new();
@@ -29,20 +32,29 @@ namespace Statistics.TweetProcessors
         }
 
         /// <summary>
-        /// Updates our local 
+        /// Updates our local in-memory count of unique hashtags
         /// </summary>
         private void UpdateLocalCount(TweetDto tweet)
         {
-            foreach (var hashtag in tweet.entities.hashtags.Select(x => x.tag))
+            foreach (var tag in tweet.entities.hashtags.Select(x => x.tag))
             {
-                hashtagToCountMap.AddOrUpdate(hashtag, 1, (_, current) => current++);
+                var normalizedHashtag = tag.ToLower();
+                hashtagToCountMap.AddOrUpdate(normalizedHashtag, 1, (_, current) => current++);
             }
         }
 
+        /// <summary>
+        /// Updates the global <see cref="TopHashtagService"/> which maintains
+        /// the total hashtag counts across the application. 
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="TopHashtagService"/> is a shared resource updated by multiple threads
+        /// allowing for horizontal scaling.
+        /// </remarks>
         private async Task UpdateGlobalCountAsync()
         {
             // Only update the shared resource in batches to reduce contention on shared resource
-            // and reduce processing bottelneck. Allows for better horizontal scaling of compute.
+            // and reduce processing bottelnecks. Allows for better horizontal scaling of compute.
             if (hashtagToCountMap.Count > 10)
             {
                 var hashtagCounts = hashtagToCountMap.Select(kvp => new HashtagCountDto(kvp.Value, kvp.Key));

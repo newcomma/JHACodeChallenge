@@ -3,7 +3,7 @@
     /// <summary>
     /// Thread-safe accessor to the 'total' number of Tweets.
     /// </summary>
-    public class TweetTotalService
+    public class TweetTotalService : ITweetTotalService
     {
         private int total;
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);

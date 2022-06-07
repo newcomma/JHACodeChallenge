@@ -8,9 +8,9 @@ namespace BlazorApp.Server.Controllers
     public class TweetTotalController : ControllerBase
     {
         private readonly ILogger<TweetTotalController> logger;
-        private readonly TweetTotalService tweetTotalService;
+        private readonly ITweetTotalService tweetTotalService;
 
-        public TweetTotalController(ILogger<TweetTotalController> logger, TweetTotalService tweetTotalService)
+        public TweetTotalController(ILogger<TweetTotalController> logger, ITweetTotalService tweetTotalService)
         {
             this.logger = logger;
             this.tweetTotalService = tweetTotalService;

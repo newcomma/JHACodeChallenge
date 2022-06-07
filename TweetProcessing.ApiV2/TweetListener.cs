@@ -1,17 +1,23 @@
 ﻿using System.Net.Http.Headers;
+using Microsoft.Extensions.Options;
 using TweetProcessing.Abstractions;
 
 namespace TweetProcessing.ApiV2
 {
     internal class TweetListener : ITweetListener
     {
-        private readonly StreamToChannelProcessor streamToChannelProcessor;
-        private readonly LinesChannel linesChannel;
+        private readonly StreamToQueueProcessor streamToChannelProcessor;
+        private readonly ITweetQueue tweetQueue;
+        private readonly string token;
 
-        public TweetListener(StreamToChannelProcessor streamToChannelProcessor, LinesChannel linesChannel)
+        public TweetListener(
+            StreamToQueueProcessor streamToChannelProcessor, 
+            ITweetQueue tweetQueue,
+            IOptions<TwitterOptions> options)
         {
             this.streamToChannelProcessor = streamToChannelProcessor;
-            this.linesChannel = linesChannel;
+            this.tweetQueue = tweetQueue;
+            this.token = options.Value.Token;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -19,7 +25,7 @@ namespace TweetProcessing.ApiV2
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 scheme: "Bearer",
-                parameter: "AAAAAAAAAAAAAAAAAAAAAKkEdQEAAAAABy0zBygPRP5JbigYnzH7L%2BW71R8%3DoxJimqeYNvNZbBJG0A7XN1W11VlafisS6VSDIScxrYT6hKimIa");
+                parameter: token);
            
             using var httpResponse = await httpClient.GetAsync(
                 requestUri: "https://api.twitter.com/2/tweets/sample/stream?tweet.fields=entities",
@@ -29,7 +35,7 @@ namespace TweetProcessing.ApiV2
 
             using var stream = await httpResponse.Content.ReadAsStreamAsync(cancellationToken);
 
-            await streamToChannelProcessor.ProcessAsync(stream, linesChannel, cancellationToken);
+            await streamToChannelProcessor.ProcessAsync(stream, tweetQueue, cancellationToken);
         }
     }
 }
